@@ -1,6 +1,6 @@
 {
     "name": "peroxide/container",
-    "description": "A simple DI container based on PSR-11 for APIs, with zero dependencies and low functionalities.",
+    "description": "Peroxide Container, a simple factory-driven PSR-11 Dependency Injection Container with zero dependencies and low functionalities.",
     "require": {
         "php": ">=8.1",
         "psr/container": "^2.0"
