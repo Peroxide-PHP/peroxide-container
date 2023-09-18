@@ -3,17 +3,18 @@ declare(strict_types=1);
 
 namespace Peroxide\DependencyInjection;
 
+use Peroxide\DependencyInjection\Exceptions\NotFoundException;
 use Peroxide\DependencyInjection\Exceptions\NotInvokableClassException;
-use PHPUnit\Framework\Attributes\CoversClass;
-use Psr\Container\ContainerInterface;
 use Peroxide\DependencyInjection\Interfaces\SetDependency;
+use Psr\Container\ContainerInterface;
 
 final class Container implements ContainerInterface, SetDependency
 {
+    /**
+     * @param array<string, string|callable> $dependencies
+     * @throws NotInvokableClassException
+     */
     public function __construct(
-        /**
-         * @var <string, object|string>array $dependencies
-         */
         protected array $dependencies = []
     ) {
         foreach ($dependencies as $id => $dependency) {
@@ -35,7 +36,7 @@ final class Container implements ContainerInterface, SetDependency
         throw new NotInvokableClassException("Class '$id' has not a '__invoke' method.");
     }
 
-    public function set(string $id, object $factory): void
+    public function set(string $id, callable $factory): void
     {
         $this->dependencies[$id] = $factory;
     }

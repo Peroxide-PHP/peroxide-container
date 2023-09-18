@@ -1,6 +1,6 @@
 <?php
 
-namespace Peroxide\DependencyInjection;
+namespace Peroxide\DependencyInjection\Exceptions;
 
 use Psr\Container\NotFoundExceptionInterface;
 

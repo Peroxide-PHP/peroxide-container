@@ -5,8 +5,9 @@ require __DIR__ . '/TestDependencies/ConcreteClass.php';
 require __DIR__ . '/TestDependencies/ConcreteClassFactory.php';
 
 use Peroxide\DependencyInjection\Container;
+use Peroxide\DependencyInjection\Exceptions\NotFoundException;
+use Peroxide\DependencyInjection\Exceptions\NotInvokableClassException;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Peroxide\DependencyInjection\NotFoundException;
 use Psr\Container\ContainerInterface;
 
 #[CoversClass(Container::class)]
@@ -46,6 +47,19 @@ class ContainerTest extends PHPUnit\Framework\TestCase
         $container = new Container([
             ConcreteClass::class => ConcreteClassFactory::class,
             ConcreteClass2::class => new ConcreteClassFactory(),
+            ConcreteClass3::class => fn() => new ConcreteClass(),
+        ]);
+
+        $concreteClass = $container->get(ConcreteClass::class);
+        $this->assertInstanceOf(ConcreteClass::class, $concreteClass);
+    }
+
+    public function testContainerShouldThrowNotInvokableClass()
+    {
+        $this->expectException(NotInvokableClassException::class);
+        $this->expectExceptionMessage('Dependency: InexistentDependency not found');
+
+        $container = new Container([
             ConcreteClass3::class => new ConcreteClass(),
         ]);
 
