@@ -54,16 +54,30 @@ class ContainerTest extends PHPUnit\Framework\TestCase
         $this->assertInstanceOf(ConcreteClass::class, $concreteClass);
     }
 
-    public function testContainerShouldThrowNotInvokableClass()
+    public function testContainerShouldThrowTypeError()
     {
-        $this->expectException(NotInvokableClassException::class);
-        $this->expectExceptionMessage('Dependency: InexistentDependency not found');
+        $this->expectException(TypeError::class);
 
         $container = new Container([
             ConcreteClass3::class => new ConcreteClass(),
         ]);
+    }
 
-        $concreteClass = $container->get(ConcreteClass::class);
-        $this->assertInstanceOf(ConcreteClass::class, $concreteClass);
+    public function testContainerShouldThrowNotInvokableClass()
+    {
+        $this->expectException(NotInvokableClassException::class);
+
+        $container = new Container([
+            ConcreteClass3::class => ConcreteClass::class,
+        ]);
+    }
+
+    public function testContainerShouldThrowClassNotInProject()
+    {
+        $this->expectException(NotFoundException::class);
+
+        $container = new Container([
+            ConcreteClass3::class => InexistentClass::class,
+        ]);
     }
 }
