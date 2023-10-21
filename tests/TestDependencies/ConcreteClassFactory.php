@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\TestDependencies;
+
 use Peroxide\DependencyInjection\Interfaces\ContainerFactory;
 use Psr\Container\ContainerInterface;
 

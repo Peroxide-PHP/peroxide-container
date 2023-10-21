@@ -1,8 +1,11 @@
 <?php
 
-require __DIR__ . '/TestDependencies/Dependency.php';
-require __DIR__ . '/TestDependencies/ConcreteClass.php';
-require __DIR__ . '/TestDependencies/ConcreteClassFactory.php';
+use Tests\TestDependencies\{ 
+    Dependency, 
+    ConcreteClass, 
+    ConcreteClassFactory,
+    ParentDependency
+};
 
 use Peroxide\DependencyInjection\Container;
 use Peroxide\DependencyInjection\Exceptions\NotFoundException;
@@ -45,9 +48,9 @@ class ContainerTest extends PHPUnit\Framework\TestCase
     public function testContainerShouldConfigDependenciesByConfigConstructorParameter()
     {
         $container = new Container([
-            ConcreteClass::class => ConcreteClassFactory::class,
-            ConcreteClass2::class => new ConcreteClassFactory(),
-            ConcreteClass3::class => fn() => new ConcreteClass(),
+            ConcreteClass::class    => ConcreteClassFactory::class,
+            ConcreteClass2::class   => new ConcreteClassFactory(),
+            ConcreteClass3::class   => fn() => new ConcreteClass(),
         ]);
 
         $concreteClass = $container->get(ConcreteClass::class);
@@ -79,5 +82,20 @@ class ContainerTest extends PHPUnit\Framework\TestCase
         $container = new Container([
             ConcreteClass3::class => InexistentClass::class,
         ]);
+    }
+
+    public function testContainerShouldInjectInnerDependencies()
+    {
+        $config = [
+            // Dependency parent with dependency child
+            ParentDependency::class => fn($container) => new ParentDependency(new Dependency())
+        ];
+
+        $container = new Container($config);
+
+        $dependencyParent = $container->get(ParentDependency::class);
+        $dependency = $dependencyParent->getInnerDependency();
+
+        $this->assertInstanceOf(Dependency::class, $dependency);
     }
 }
