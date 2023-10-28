@@ -31,11 +31,13 @@ final class Container implements ContainerInterface, SetDependency
         if (false === class_exists($invocableClass)) {
             throw new NotFoundException("Class '$id' isn't in project autoload");
         }
+
         $invocableObject = new $invocableClass($this);
         if (true === is_callable($invocableObject)) {
             $this->dependencies[$id] = $invocableObject;
             return;
         }
+
         throw new NotInvokableClassException("Class '$id' has not a '__invoke' method.");
     }
 
