@@ -27,7 +27,7 @@ public function set(string $id, callable $factory): void;
 public function setInvokableClass(string $id, string $invocableClass): void;
 ```
 
-### Create you configuration as *array*
+### Create your configuration as *array*
 ```php
 <?php
 use Peroxide\DependencyInjection\Container;
@@ -89,9 +89,16 @@ $container = new Container([
         return new ParentDependency(
             $container->get(Dependency::class)
         );
-    }
+    },
+
     // or simply
-    ParentDependency::class => fn($c) => new ParentDependency($c->get(Dependency::class))
+    ParentDependency::class => fn($c) => new ParentDependency($c->get(Dependency::class)),
+
+    // more complex injections
+    ParentDependency::class => fn($c) => new ComponentThatHasTwoDeps(
+        $c->get(Dependency::class),
+        $c->get(AnotherDependency::class),
+    )
 ]);
 ```
 You can also compose your configuration using the spread operator, as shown in the example:
@@ -123,6 +130,8 @@ $container = new Container([
 ]);
 ```
 The ```Peroxide\DependencyInjection\Invokables\Singleton``` class serves as a wrapper to indicate to our container that we want this class to not create a new instance every time it is retrieved.
+
+The first parameter of ```Singleton``` constructor, only accepts callable class or closures.
 
 ## Why can't I config parameters on container?
 We believe that storing configuration values in the dependency container is unnecessary. Instead, each service should be configured using external environment data. By doing so, you can centralize your project's configuration.
