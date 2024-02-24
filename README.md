@@ -4,7 +4,7 @@
 A straightforward Dependency Injection container, designed for use with APIs, adhering to the PSR-11 standard. It boasts minimal functionality and operates independently, free from external dependencies.
 
 ## Our filosophy
-We are passionate about working with components that are as clean and simple as possible. **Peroxide\Container** is a fusion of inspiration drawn from libraries such as *Laminas\ServiceManager*, *Pimple*, and with a touch of *PHPCI*.
+We are passionate about working with components that are as clean and simple as possible. **Peroxide\Container** is a fusion of inspiration drawn from libraries such as *Laminas\ServiceManager*, *Pimple*, and with a touch of *PHP-DI*.
 
 The great advantage is that we have no external dependencies. All configuration is achieved through PHP code using array configuration files. All you need to do is ensure that your framework supports PSR-11, set up the configuration, and you're ready to begin your coding journey.
 ## How to use it
@@ -27,7 +27,7 @@ public function set(string $id, callable $factory): void;
 public function setInvokableClass(string $id, string $invocableClass): void;
 ```
 
-### Create you configuration as *array*
+### Create your configuration as *array*
 ```php
 <?php
 use Peroxide\DependencyInjection\Container;
@@ -83,15 +83,22 @@ $container = new Container([
     // Dependency parent with dependency child
     
     // all dependencies should be involved by a Closure(function() or fn()) 
-    Dependency::class       => fn() => new Dependency(),
+    Dependency::class              => fn() => new Dependency(),
     
-    ParentDependency::class => function($container) { 
-        return new ParentDependency(
+    ComponentThatHasAnotherDependency::class => function($container) { 
+        return new ComponentThatHasAnotherDependency(
             $container->get(Dependency::class)
         );
-    }
+    },
+
     // or simply
-    ParentDependency::class => fn($c) => new ParentDependency($c->get(Dependency::class))
+    ComponentThatHasAnotherDependency::class => fn($c) => new ComponentThatHasAnotherDependency($c->get(Dependency::class)),
+
+    // more complex injections
+    ComponentThatHasTwoDeps::class => fn($c) => new ComponentThatHasTwoDeps(
+        $c->get(Dependency::class),
+        $c->get(AnotherDependency::class),
+    )
 ]);
 ```
 You can also compose your configuration using the spread operator, as shown in the example:
@@ -123,6 +130,8 @@ $container = new Container([
 ]);
 ```
 The ```Peroxide\DependencyInjection\Invokables\Singleton``` class serves as a wrapper to indicate to our container that we want this class to not create a new instance every time it is retrieved.
+
+The first parameter of ```Singleton``` constructor, only accepts callable class or closures.
 
 ## Why can't I config parameters on container?
 We believe that storing configuration values in the dependency container is unnecessary. Instead, each service should be configured using external environment data. By doing so, you can centralize your project's configuration.

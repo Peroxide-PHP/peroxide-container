@@ -3,7 +3,7 @@
 
 Um contêiner de Injeção de Dependência direto, projetado para ser usado com APIs, aderindo ao padrão PSR-11. Ele oferece funcionalidade mínima e opera de forma independente, sem depender de recursos externos.
 ## Nossa filosofia
-Somos apaixonados por trabalhar com componentes o mais limpos e simples possível. **Peroxide/Container** é uma fusão de inspiração proveniente de bibliotecas como *Laminas\ServiceManager*, *Pimple*, e um toque de *PHPCI*.
+Somos apaixonados por trabalhar com componentes o mais limpos e simples possível. **Peroxide/Container** é uma fusão de inspiração proveniente de bibliotecas como *Laminas\ServiceManager*, *Pimple*, e um toque de *PHP-DI*.
 
 A grande vantagem é que não temos dependências externas. Toda a configuração é feita por meio de código PHP usando arquivos de configuração em forma de arrays. Tudo o que você precisa fazer é garantir que seu Framework suporte a PSR-11, configure a biblioteca e você estará pronto para começar sua jornada de codificação.
 
@@ -77,19 +77,29 @@ $container->set(DependencyPath::class, fn() => new DependencyInstance());
 
 Se a dependência não existir, ela será criada; caso contrário, será substituída pela atual definição.
 ## Mais configurações
-Para lidar com injeção de dependência dentro do contêiner, você pode facilmente usar uma ```arrow function``` para compor suas dependências.
+Para lidar com injeção de dependência dentro do contêiner, você pode facilmente usar uma 
+```arrow function``` para compor suas dependências.
 ```php
 $container = new Container([
     // todas as dependências devem ser envolvidas por uma Closure (função ou fn())
     Dependency::class       => fn() => new Dependency(),
     
-    ParentDependency::class => function($container) { 
-        return new ParentDependency(
+    
+    ComponentThatHasAnotherDependency::class => function($container) { 
+        return new ComponentThatHasAnotherDependency(
             $container->get(Dependency::class)
         );
-    }
+    },
+
     // ou simplesmente
-    ParentDependency::class => fn($c) => new ParentDependency($c->get(Dependency::class))
+    ComponentThatHasAnotherDependency::class => fn($c) => 
+        new ComponentThatHasAnotherDependency($c->get(Dependency::class)),
+
+    // uma injeção mais complexa
+    ComponentThatHasTwoDeps::class => fn($c) => new ComponentThatHasTwoDeps(
+        $c->get(Dependency::class),
+        $c->get(AnotherDependency::class),
+    )
 ]);
 ```
 Você também pode compor sua configuração usando o operador de expansão, como mostrado no exemplo:
@@ -120,7 +130,11 @@ $container = new Container([
     )
 ]);
 ```
-A classe ```Peroxide\DependencyInjection\Invokables\Singleton``` atua como um invólucro para indicar ao nosso contêiner que desejamos que esta classe não crie uma nova instância toda vez que for solicitada.
+A classe ```Peroxide\DependencyInjection\Invokables\Singleton``` atua como um invólucro 
+para indicar ao nosso contêiner que desejamos que esta classe não crie uma nova instância 
+toda vez que for solicitada.
 
 ## Por que não posso configurar parâmetros no contêiner?
-Acreditamos que não é necessário armazenar valores de configuração no contêiner de dependência. Em vez disso, cada serviço deve ser configurado usando dados de ambiente externos (por exemplo .env). Fazendo isso, você centraliza a configuração do seu projeto.
+Acreditamos que não é necessário armazenar valores de configuração no contêiner de dependência.
+Em vez disso, cada serviço deve ser configurado usando dados de ambiente externos (por exemplo .env).
+Fazendo isso, você centraliza a configuração do seu projeto.

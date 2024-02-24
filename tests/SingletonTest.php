@@ -6,6 +6,7 @@ use Peroxide\DependencyInjection\Container;
 use Peroxide\DependencyInjection\Invokables\Singleton;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Tests\TestDependencies\ConcreteClassFactory;
 use Tests\TestDependencies\Dependency;
 
 #[CoversClass(Singleton::class)]
@@ -41,5 +42,17 @@ class SingletonTest extends TestCase
         $this->assertSame($dependency1, $dependency2);
         $this->assertSame($dependency1, $dependency3);
         $this->assertSame($dependency2, $dependency3);
+    }
+
+    public function testDependencyWithFactoryInvokableString()
+    {
+        $singleton = new Singleton(fn() => new ConcreteClassFactory());
+
+        $container = new Container();
+
+        $dependency1 = $singleton($container);
+        $dependency2 = $singleton($container);
+
+        $this->assertSame($dependency1, $dependency2);
     }
 }
