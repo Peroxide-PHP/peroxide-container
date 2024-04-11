@@ -123,11 +123,15 @@ use Peroxide\DependencyInjection\Container;
 use Peroxide\DependencyInjection\Invokables\Singleton;
 
 $container = new Container([
-    // Dependência pai com dependência filha
+    // Dependência pai com filha.
     Dependency::class       => new Singleton(fn() => new Dependency()),
+    
     ParentDependency::class => new Singleton(
         fn($container) => new ParentDependency($container->get(Dependency::class))
-    )
+    ),
+    
+    // Singleton passando string como referencia de classe factory
+    ConcreteClass::class    => new Singleton(ConcreteClassFactory::class)
 ]);
 ```
 A classe ```Peroxide\DependencyInjection\Invokables\Singleton``` atua como um invólucro 

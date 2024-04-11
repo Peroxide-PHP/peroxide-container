@@ -124,9 +124,13 @@ use Peroxide\DependencyInjection\Invokables\Singleton;
 $container = new Container([
     // Dependency parent with dependency child
     Dependency::class       => new Singleton(fn() => new Dependency()),
+    
     ParentDependency::class => new Singleton(
         fn($container) => new ParentDependency($container->get(Dependency::class))
-    )
+    ),
+    
+    // Singleton passing factory as reference string
+    ConcreteClass::class    => new Singleton(ConcreteClassFactory::class)
 ]);
 ```
 The ```Peroxide\DependencyInjection\Invokables\Singleton``` class serves as a wrapper to indicate to our container that we want this class to not create a new instance every time it is retrieved.

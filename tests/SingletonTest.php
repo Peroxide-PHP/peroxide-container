@@ -44,9 +44,21 @@ class SingletonTest extends TestCase
         $this->assertSame($dependency2, $dependency3);
     }
 
-    public function testDependencyWithFactoryInvokableString()
+    public function testDependencyWithFactoryInvokableInstance()
     {
         $singleton = new Singleton(fn() => new ConcreteClassFactory());
+
+        $container = new Container();
+
+        $dependency1 = $singleton($container);
+        $dependency2 = $singleton($container);
+
+        $this->assertSame($dependency1, $dependency2);
+    }
+
+    public function testDependencyWithFactoryInvokableString()
+    {
+        $singleton = new Singleton(ConcreteClassFactory::class);
 
         $container = new Container();
 

@@ -2,6 +2,8 @@
 
 namespace Peroxide\DependencyInjection\Invokables;
 
+use Peroxide\DependencyInjection\Exceptions\NotFoundException;
+use Peroxide\DependencyInjection\Exceptions\NotInvokableClassException;
 use Peroxide\DependencyInjection\Interfaces\ContainerFactory;
 use Psr\Container\ContainerInterface;
 
@@ -15,12 +17,12 @@ class Singleton implements ContainerFactory
     protected array $singletonObjects = [];
 
     /**
-     * @var Closure $factoryAction
+     * @var Closure|string $factoryAction
      */
-    protected Closure $factoryAction;
+    protected Closure|string $factoryAction;
 
     public function __construct(
-        callable $factory,
+        callable|string $factory,
         protected string $dependencyId = ''
     ) {
         $this->dependencyId = uniqid();
@@ -32,9 +34,14 @@ class Singleton implements ContainerFactory
         return isset($this->singletonObjects[$dependencyId]);
     }
 
-    protected function store(string $dependencyName, callable $factoryAction, ContainerInterface $container): void
+    protected function store(
+        string $dependencyName,
+        callable|string $factoryAction,
+        ContainerInterface $container
+    ): void
     {
-        $this->singletonObjects[$dependencyName] = $factoryAction($container);
+        $callable = $this->getCallableFrom($factoryAction, $container);
+        $this->singletonObjects[$dependencyName] = $callable($container);
     }
 
     public function __invoke(ContainerInterface $container): object
@@ -44,5 +51,26 @@ class Singleton implements ContainerFactory
         }
         $this->store($this->dependencyId, $this->factoryAction, $container);
         return $this->singletonObjects[$this->dependencyId];
+    }
+
+    protected function getCallableFrom(callable|string $factoryAction, $container): callable
+    {
+        if (is_string($factoryAction)) {
+            return $this->getClassFactoryInstance($factoryAction);
+        }
+        return $factoryAction;
+    }
+
+    protected function getClassFactoryInstance(string $factoryAction)
+    {
+        if (false === class_exists($factoryAction)) {
+            throw new NotFoundException("Class '$factoryAction' was not found");
+        }
+
+        $instance = new $factoryAction();
+        if (false === is_callable($instance)) {
+            throw new NotInvokableClassException("Class '$factoryAction' is not invokable");
+        }
+        return $instance;
     }
 }

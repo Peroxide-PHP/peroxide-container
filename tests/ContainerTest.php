@@ -148,7 +148,7 @@ class ContainerTest extends PHPUnit\Framework\TestCase
         $container = new Container([
             // Dependency parent with dependency child
             Dependency::class        => new Singleton(fn() => new Dependency()),
-            AnotherDependency::class => function($container) {
+            'AnotherDependency'      => function($container) {
                 $dep1 = $container->get(Dependency::class);
                 $dep1->testProp = 123;
                 return $dep1;
@@ -157,10 +157,29 @@ class ContainerTest extends PHPUnit\Framework\TestCase
 
         $container->get(Dependency::class);
 
-        $changedStateDependency = $container->get(AnotherDependency::class);
+        $container->get('AnotherDependency');
 
         $dependency = $container->get(Dependency::class);
 
         $this->assertEquals(123, $dependency->testProp);
+    }
+
+    public function testCreateSingletonWithFactoryInvocableString()
+    {
+        $container = new Container([
+            // Dependency parent with dependency child
+            ConcreteClass::class  => new Singleton(ConcreteClassFactory::class),
+            'ChangeConcreteClass' => function($container) {
+                $dep1 = $container->get(ConcreteClass::class);
+                $dep1->testProp = 123;
+                return $dep1;
+            }
+        ]);
+
+        $dependency1 = $container->get(ConcreteClass::class);
+        $sameDependency = $container->get('ChangeConcreteClass');
+        $sameDependency->testProp = 456;
+
+        $this->assertSame($dependency1->testProp, $sameDependency->testProp);
     }
 }
