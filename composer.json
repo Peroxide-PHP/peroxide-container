@@ -21,7 +21,8 @@
         }
     },
     "scripts": {
-        "tests": "phpunit"
+        "tests": "phpunit",
+        "coverage": "XDEBUG_MODE=coverage phpunit --coverage-html coverage"
     },
     "authors": [
         {
