@@ -10,6 +10,7 @@
          failOnRisky="true"
          failOnWarning="true"
          colors="true"
+         testdox="true"
         >
     <testsuites>
         <testsuite name="default">
