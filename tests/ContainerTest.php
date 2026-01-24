@@ -16,6 +16,7 @@ use Psr\Container\ContainerInterface;
 use Peroxide\DependencyInjection\Invokables\Singleton;
 
 #[CoversClass(Container::class)]
+#[CoversClass(Singleton::class)]
 class ContainerTest extends PHPUnit\Framework\TestCase
 {
     public function testContainerShouldSetDependencyAndGetDependency()

@@ -3,13 +3,21 @@
 namespace Tests;
 
 use Peroxide\DependencyInjection\Container;
+use Peroxide\DependencyInjection\Exceptions\NotFoundException;
+use Peroxide\DependencyInjection\Exceptions\NotInvokableClassException;
 use Peroxide\DependencyInjection\Invokables\Singleton;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tests\TestDependencies\ConcreteClassFactory;
-use Tests\TestDependencies\Dependency;
+
+use Tests\TestDependencies\{
+    ConcreteClass,
+    ConcreteClassFactory,
+    Dependency
+};
 
 #[CoversClass(Singleton::class)]
+#[CoversClass(Container::class)]
 class SingletonTest extends TestCase
 {
     public function testDependencyShouldBeSingleCall()
@@ -66,5 +74,27 @@ class SingletonTest extends TestCase
         $dependency2 = $singleton($container);
 
         $this->assertSame($dependency1, $dependency2);
+    }
+
+    public function testDependencyWithFactoryInvokableStringDoesNotExists()
+    {
+        $this->expectException(NotFoundException::class);
+
+        $singleton = new Singleton('InexistentClassFactory');
+
+        $container = new Container();
+
+        $singleton($container);
+    }
+
+    public function testDependencyWithFactoryInvokableStringIsNotInvokable()
+    {
+        $this->expectException(NotInvokableClassException::class);
+
+        $singleton = new Singleton(ConcreteClass::class);
+
+        $container = new Container();
+
+        $singleton($container);
     }
 }
